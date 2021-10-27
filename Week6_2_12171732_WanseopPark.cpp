@@ -2,89 +2,83 @@
 #include <queue>
 using namespace std;
 
+
+
+int dx[8] = { -1,-1,-1,0,1,1,1, 0 };
+int dy[8] = { 1,0,-1,-1,-1,0,1,1 };
+
 int arr[1001][1001];
-bool check[1001][1001];
-int x[8] = { -1,-1,-1,0,1,1,1,0 };
-int y[8] = { 1,0,-1,-1,-1,0,1,1 };
-int n;
+int check[1001][1001];
+int dist[1001][1001];
 
 int main()
 {
+    ios_base::sync_with_stdio(false);
+    cin.tie(NULL);
+    cout.tie(NULL);
+
     int t;
-	cin >> t;
-	while (t--)
-	{
-		for (int i = 0; i < 1001; i++) {
-			for (int j = 0; j < 1001; j++) {
-				arr[i][j] = 0;
-				check[i][j] = false;
-			}
-		}
+    cin >> t;
+    while (t--) {
+        int n;
+        cin >> n;
+        int arow, acol, brow, bcol; // a인하 b 안전지역
+        cin >> arow >> acol >> brow >> bcol;
+        int crow, ccol, drow, dcol; // c 검사 d 소총수
+        cin >> crow >> ccol >> drow >> dcol;
 
 
-		cin >> n;
-		
-		int a, b, c, d; // 인하 a,b 안전지역 c,d
-		cin >> a >> b >> c >> d;
-		
-		int e, f, g, h; // 소총수 e,f 검사 g,h
-		cin >> g >> h >> e >> f;
-		
 
-		check[e][f] = true;
-		check[g][h] = true;
+        check[crow][ccol] = 2;
+        for (int i = 0; i < 8; i++) {
+            if (crow + dy[i] >= 1 && crow + dy[i] <= n && ccol + dx[i] >= 1 && ccol + dx[i] <= n) {
+                check[crow + dy[i]][ccol + dx[i]] = 1;
+            }
+        }
 
-		int sof = f;
-		int soe = e;
+        check[drow][dcol] = 1;
+        for (int i = 0; i < 8; i++) {
+            int nrow = drow + dy[i];
+            int ncol = dcol + dx[i];
+            while (nrow >= 1 && nrow <= n && ncol >= 1 && ncol <= n) {
+                if (check[nrow][ncol] == 2) break;
+                check[nrow][ncol] = 1;
+
+                nrow += dy[i];
+                ncol += dx[i];
+            }
+        }
+
+        queue<pair<int, int>> q;
+        q.push({ arow,acol });
+        check[arow][acol] = 1;
+        dist[arow][acol] = 0;
+        while (!q.empty()) {
+            int row = q.front().first;
+            int col = q.front().second;
+            q.pop();
+            for (int i = 0; i < 8; i++) {
+                int nrow = row + dy[i];
+                int ncol = col + dx[i];
+                if (nrow >= 1 && nrow <= n && ncol >= 1 && ncol <= n) {
+                    if (check[nrow][ncol] == 0) {
+                        q.push({ nrow,ncol });
+                        check[nrow][ncol] = 1;
+                        dist[nrow][ncol] = dist[row][col] + 1;
+                    }
+                }
+            }
+        }
+
+        cout << dist[brow][bcol] << "\n";
 
 
-		
-		for (int i = 0; i < 8; i++) {
-			//소총수
-			while ((soe >= 1 && soe <= n) && (sof >= 1 && sof <= n)) {
-				sof += x[i];
-				soe += y[i];
-
-				if (arr[soe][sof]  == false) {
-					check[soe][sof] = true;
-				}
-				else {
-					break;
-				}
-			}
-			sof = f;
-			soe = e;
-			
-			// 검사
-			if (g + y[i] >= 0 && g + y[i] <= n && h + x[i] >= 0 && h + x[i] <= n) {
-				check[g + y[i]][h + x[i]] = true;
-			}
-		}
-
-		queue<pair<int, int>> q;
-
-		q.push({ a,b });
-		check[a][b] = true;
-
-		while (!q.empty()) {
-			int row = q.front().first;
-			int col = q.front().second;
-			q.pop();
-
-			for (int i = 0; i < 8; i++) {
-				int nrow = row + y[i];
-				int ncol = col + x[i];
-				if (nrow >= 1 && nrow <= n && ncol >= 1 && ncol <= n) {
-					if (check[nrow][ncol] == false) {
-						q.push({ nrow,ncol });
-						check[nrow][ncol] = true;
-						arr[nrow][ncol] = arr[row][col] + 1;
-					}
-				}
-			}
-		}
-
-		cout << arr[c][d] << "\n";
-
-	}
+        for (int i = 0; i <= n; i++) {
+            for (int j = 0; j <= n; j++) {
+                arr[i][j] = 0;
+                    check[i][j] = 0;
+                    dist[i][j] = 0;
+            }
+        }
+    }
 }
